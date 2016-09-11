@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Web;
 using System.Web.Mvc;
+using MongoDB.Bson;
 using MongoDB.Driver;
 using RealEstate.App_Start;
 using RealEstate.Properties;
@@ -11,12 +12,14 @@ namespace RealEstate.Controllers
 {
 	public class HomeController : Controller
 	{
-		public RealEstateContext Context = new RealEstateContext();
+		//public RealEstateContext Context = new RealEstateContext();
+        public RealEstateContextNewApi Context = new RealEstateContextNewApi();
 
 		public ActionResult Index()
 		{
-			Context.Database.GetStats();
-			return Json(Context.Database.Server.BuildInfo, JsonRequestBehavior.AllowGet);
+            var buildInfoCommand = new BsonDocument("buildinfo",1);
+		    var buildInfo = Context.Database.RunCommand<BsonDocument>(buildInfoCommand);
+		    return Content(buildInfo.ToJson(), "application/json");
 		}
 
 		public ActionResult About()

@@ -1,4 +1,6 @@
-﻿namespace RealEstate.Rentals
+﻿using MongoDB.Bson.Serialization;
+
+namespace RealEstate.Rentals
 {
 	using System.Collections.Generic;
 	using System.Linq;
@@ -13,10 +15,13 @@
 	public class RentalsController : Controller
 	{
 		public readonly RealEstateContext Context = new RealEstateContext();
+        public readonly RealEstateContextNewApi ContextNew = new RealEstateContextNewApi();
 
 		public ActionResult Index(RentalsFilter filters)
 		{
 			var rentals = FilterRentals(filters);
+
+            
 			var model = new RentalsList
 			{
 				Rentals = rentals,

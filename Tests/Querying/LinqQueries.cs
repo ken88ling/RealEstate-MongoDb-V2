@@ -16,8 +16,7 @@
 		{
 			var query = Query<Rental>.LTE(r => r.Price, 500);
 
-			var queryable = new RealEstateContext()
-				.Rentals.AsQueryable()
+			var queryable = new RealEstateContext().Rentals.AsQueryable()
 				.Where(r => query.Inject());
 
 			var translated = MongoQueryTranslator.Translate(queryable)
