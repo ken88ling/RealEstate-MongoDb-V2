@@ -23,6 +23,19 @@
 			}
 		}
 	}
+
+    public class RealEstateContextNewApi
+    {
+        public IMongoDatabase Database;
+
+        public RealEstateContextNewApi()
+        {
+            var client = new MongoClient(Settings.Default.RealEstateConnectionString);
+            Database = client.GetDatabase(Settings.Default.RealEstateDatabaseName);
+        }
+
+        public IMongoCollection<Rental> Rentals => Database.GetCollection<Rental>("rentals");
+    }
 }
 
 
