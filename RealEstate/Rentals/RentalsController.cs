@@ -1,4 +1,6 @@
-﻿using MongoDB.Bson.Serialization;
+﻿using System.Threading.Tasks;
+using MongoDB.Bson.Serialization;
+using MongoDB.Driver;
 
 namespace RealEstate.Rentals
 {
@@ -17,10 +19,12 @@ namespace RealEstate.Rentals
 		public readonly RealEstateContext Context = new RealEstateContext();
         public readonly RealEstateContextNewApi ContextNew = new RealEstateContextNewApi();
 
-		public ActionResult Index(RentalsFilter filters)
+		public async Task<ActionResult> Index(RentalsFilter filters)
 		{
-			var rentals = FilterRentals(filters);
-
+			//var rentals = FilterRentals(filters);
+		    var rentals =await ContextNew.Rentals
+		        .Find(Builders<Rental>.Filter.Where(r=>r.NumberOfRooms >= filters.MinimumRooms.Value))
+		        .ToListAsync();
             
 			var model = new RentalsList
 			{
