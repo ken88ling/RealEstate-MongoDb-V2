@@ -16,10 +16,11 @@ namespace RealEstate.Rentals
 
 	public class RentalsController : Controller
 	{
-		public readonly RealEstateContext Context = new RealEstateContext();
-        public readonly RealEstateContextNewApi ContextNew = new RealEstateContextNewApi();
+		
+        public readonly RealEstateContextNewApis ContextNew = new RealEstateContextNewApis();
+        public readonly RealEstateContext Context = new RealEstateContext();
 
-		public async Task<ActionResult> Index(RentalsFilter filters)
+        public async Task<ActionResult> Index(RentalsFilter filters)
 		{
 			//var rentals = FilterRentals(filters);
 

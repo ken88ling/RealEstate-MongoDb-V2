@@ -14,7 +14,7 @@ namespace RealEstate.Controllers
 	public class HomeController : Controller
 	{
 		//public RealEstateContext Context = new RealEstateContext();
-        public RealEstateContextNewApi Context = new RealEstateContextNewApi();
+        public RealEstateContextNewApis Context = new RealEstateContextNewApis();
 
 		public async Task<ActionResult> Index()
 		{

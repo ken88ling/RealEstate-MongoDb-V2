@@ -1,10 +1,10 @@
 ﻿namespace RealEstate.App_Start
 {
-	using MongoDB.Driver;
-	using Properties;
-	using Rentals;
+    using MongoDB.Driver;
+    using Properties;
+    using Rentals;
 
-	public class RealEstateContext
+    public class RealEstateContext
 	{
 		public MongoDatabase Database;
 
@@ -24,19 +24,23 @@
 		}
 	}
 
-    public class RealEstateContextNewApi
+    public class RealEstateContextNewApis
     {
         public IMongoDatabase Database;
 
-        public RealEstateContextNewApi()
+        public RealEstateContextNewApis()
         {
-            var client = new MongoClient(Settings.Default.RealEstateConnectionString);
+            var connectionString = Settings.Default.RealEstateConnectionString;
+            var settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
+            settings.ClusterConfigurator = builder => builder.Subscribe(new Log4NetMongoEvents());//make the log history
+            var client = new MongoClient(settings);
             Database = client.GetDatabase(Settings.Default.RealEstateDatabaseName);
         }
 
         public IMongoCollection<Rental> Rentals => Database.GetCollection<Rental>("rentals");
     }
 }
+
 
 
 
