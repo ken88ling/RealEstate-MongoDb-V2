@@ -22,9 +22,12 @@ namespace RealEstate.Rentals
 		public async Task<ActionResult> Index(RentalsFilter filters)
 		{
 			//var rentals = FilterRentals(filters);
+
+		    var filterDefinition = filters.ToFilterDefinition();
+
 		    var rentals =await ContextNew.Rentals
-		        .Find(Builders<Rental>.Filter.Where(r=>r.NumberOfRooms >= filters.MinimumRooms.Value))
-		        .ToListAsync();
+                .Find(filterDefinition)
+                .ToListAsync();
             
 			var model = new RentalsList
 			{
@@ -34,7 +37,7 @@ namespace RealEstate.Rentals
 			return View(model);
 		}
 
-		private IEnumerable<Rental> FilterRentals(RentalsFilter filters)
+	    private IEnumerable<Rental> FilterRentals(RentalsFilter filters)
 		{
 			IQueryable<Rental> rentals = Context.Rentals.AsQueryable()
 				.OrderBy(r => r.Price);
