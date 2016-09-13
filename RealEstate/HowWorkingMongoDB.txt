@@ -1,0 +1,35 @@
+﻿1. Download from http://media.mongodb.org/zips.json?_ga=1.151234041.1309999726.1466650312#
+2. open cmd and type
+C:\Program Files\MongoDB\Server\3.2\bin\mongoimport.exe 
+--db realestate(databaseName) 
+--collection zips(table name) 
+--file c:\users\yhlin\Downloads\zips.json
+
+3. open new mongo shell and type detail as below.
+var mapStatePopulations = function(){
+    emit(this.state, this.pop);
+};
+
+var reduceStatePopulation = function(state, zipCodePopulations){
+    return Array.sum(zipCodePopulations);
+};
+db.zips.mapReduce(
+    mapStatePopulations,
+    reduceStatePopulation,
+    { out: "statePopulations"}
+    )
+
+// it will add one more collection name is "statePopulations" and detail is 
+{
+    "_id" : "AK",
+    "value" : 544698.0
+}
+
+4. to view the value by sorting
+db.getCollection('statePopulations').find({}).sort({value:1})
+
+5. introduct new aggregate function
+db.zips.aggregate([
+{$group:{_id:"$state",population:{$sum:"$pop"}}},
+{$sort:{population:1}}
+])

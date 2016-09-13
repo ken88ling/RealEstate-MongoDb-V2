@@ -1,4 +1,7 @@
-﻿namespace RealEstate.App_Start
+﻿using System.Diagnostics;
+using MongoDB.Driver.Core.Configuration;
+
+namespace RealEstate.App_Start
 {
     using MongoDB.Driver;
     using Properties;
@@ -32,7 +35,12 @@
         {
             var connectionString = Settings.Default.RealEstateConnectionString;
             var settings = MongoClientSettings.FromUrl(new MongoUrl(connectionString));
-            settings.ClusterConfigurator = builder => builder.Subscribe(new Log4NetMongoEvents());//make the log history
+            //settings.ClusterConfigurator = builder => builder.Subscribe(new Log4NetMongoEvents());//make the log history
+            settings.ClusterConfigurator = builder =>
+            {
+                builder.Subscribe(new Log4NetMongoEvents());
+                //builder.TraceWith(new TraceSource());
+            };
             var client = new MongoClient(settings);
             Database = client.GetDatabase(Settings.Default.RealEstateDatabaseName);
         }
