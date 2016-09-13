@@ -66,10 +66,11 @@ namespace RealEstate.Rentals
 		}
 
 		[HttpPost]
-		public ActionResult Post(PostRental postRental)
+		public async Task<ActionResult> Post(PostRental postRental)
 		{
 			var rental = new Rental(postRental);
-			Context.Rentals.Insert(rental);
+			// Context.Rentals.Insert(rental); old api
+		    await ContextNew.Rentals.InsertOneAsync(rental);
 			return RedirectToAction("Index");
 		}
 
@@ -81,32 +82,54 @@ namespace RealEstate.Rentals
 
 		private Rental GetRental(string id)
 		{
-			var rental = Context.Rentals.FindOneById(new ObjectId(id));
+			//var rental = Context.Rentals.FindOneById(new ObjectId(id));// old api
+		    var rental = ContextNew.Rentals
+                .Find(r => r.Id == id).FirstOrDefault();
+
 			return rental;
 		}
 
-		[HttpPost]
-		public ActionResult AdjustPrice(string id, AdjustPrice adjustPrice)
-		{
-			var rental = GetRental(id);
-			rental.AdjustPrice(adjustPrice);
-			Context.Rentals.Save(rental);
-			return RedirectToAction("Index");
-		}
 
-		[HttpPost]
-		public ActionResult AdjustPriceUsingModification(string id, AdjustPrice adjustPrice)
-		{
-			var rental = GetRental(id);
-			var adjustment = new PriceAdjustment(adjustPrice, rental.Price);
-			var modificationUpdate = Update<Rental>
-				.Push(r => r.Adjustments, adjustment)
-				.Set(r => r.Price, adjustPrice.NewPrice);
-			Context.Rentals.Update(Query.EQ("_id", new ObjectId(id)), modificationUpdate);
-			return RedirectToAction("Index");
-		}
+        //[HttpPost] //Replace document
+        //public async Task<ActionResult> AdjustPrice(string id, AdjustPrice adjustPrice)
+        //{
+        //    var rental = GetRental(id);
+        //    rental.AdjustPrice(adjustPrice);
+        //    //Context.Rentals.Save(rental);
+        //    await ContextNew.Rentals.ReplaceOneAsync(r => r.Id == id, rental);
+        //    return RedirectToAction("Index");
+        //}
 
-		public ActionResult Delete(string id)
+        //[HttpPost] //update document
+        //public async Task<ActionResult> AdjustPrice(string id, AdjustPrice adjustPrice)
+        //{
+        //    var rental = GetRental(id);
+        //    var adjustment = new PriceAdjustment(adjustPrice, rental.Price);
+        //    var modificationUpdate = Builders<Rental>.Update
+        //        .Push(r => r.Adjustments, adjustment)
+        //        .Set(r => r.Price, adjustPrice.NewPrice);
+        //    //Context.Rentals.Update(Query.EQ("_id", new ObjectId(id)), modificationUpdate);
+        //    await ContextNew.Rentals.UpdateOneAsync(r => r.Id == id, modificationUpdate);
+        //    return RedirectToAction("Index");
+        //}
+
+        [HttpPost]
+        public async Task<ActionResult> AdjustPrice(string id, AdjustPrice adjustPrice)
+        {
+            var rental = GetRental(id);
+            rental.AdjustPrice(adjustPrice);
+            //Context.Rentals.Save(rental);
+
+            UpdateOptions options = new UpdateOptions
+            {
+                IsUpsert = true
+            };
+
+            await ContextNew.Rentals.ReplaceOneAsync(r => r.Id == id, rental, options);
+            return RedirectToAction("Index");
+        }
+
+        public ActionResult Delete(string id)
 		{
 			Context.Rentals.Remove(Query.EQ("_id", new ObjectId(id)));
 			return RedirectToAction("Index");
