@@ -27,6 +27,8 @@ namespace RealEstate.Rentals
 
 		    var rentals =await ContextNew.Rentals
                 .Find(filterDefinition)
+                .SortBy(r=>r.Price)
+                .ThenByDescending(r=>r.NumberOfRooms)
                 .ToListAsync();
             
 			var model = new RentalsList
