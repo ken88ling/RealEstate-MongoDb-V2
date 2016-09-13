@@ -129,9 +129,10 @@ namespace RealEstate.Rentals
             return RedirectToAction("Index");
         }
 
-        public ActionResult Delete(string id)
+        public async Task<ActionResult> Delete(string id)
 		{
-			Context.Rentals.Remove(Query.EQ("_id", new ObjectId(id)));
+			//Context.Rentals.Remove(Query.EQ("_id", new ObjectId(id))); old api
+		    await ContextNew.Rentals.DeleteOneAsync(r => r.Id == id);
 			return RedirectToAction("Index");
 		}
 
