@@ -22,13 +22,8 @@ namespace RealEstate.Rentals
 
         public async Task<ActionResult> Index(RentalsFilter filters)
 		{
-			//var rentals = FilterRentals(filters);
-
-		    var filterDefinition = filters.ToFilterDefinition();
-
-		    var rentals =await ContextNew.Rentals
-                .Find(filterDefinition)
-                .Project(r=>new RentalViewModel()
+		    var rentals =await FilterRentals(filters)
+                .Select(r=>new RentalViewModel()
 		        {
 		            Id = r.Id,
                     Address = r.Address,
@@ -36,7 +31,7 @@ namespace RealEstate.Rentals
                     NumberOfRooms = r.NumberOfRooms,
                     Price = r.Price
 		        })
-                .SortBy(r=>r.Price)
+                .OrderBy(r=>r.Price)
                 .ThenByDescending(r=>r.NumberOfRooms)
                 .ToListAsync();
             
@@ -48,10 +43,9 @@ namespace RealEstate.Rentals
 			return View(model);
 		}
 
-	    private IEnumerable<Rental> FilterRentals(RentalsFilter filters)
-		{
-			IQueryable<Rental> rentals = Context.Rentals.AsQueryable()
-				.OrderBy(r => r.Price);
+	    private IMongoQueryable<Rental> FilterRentals(RentalsFilter filters)
+	    {
+	        IMongoQueryable<Rental> rentals = ContextNew.Rentals.AsQueryable();
 
 			if (filters.MinimumRooms.HasValue)
 			{
@@ -61,11 +55,9 @@ namespace RealEstate.Rentals
 
 			if (filters.PriceLimit.HasValue)
 			{
-				var query = Query<Rental>.LTE(r => r.Price, filters.PriceLimit);
-				rentals = rentals
-					.Where(r => query.Inject());
+			    rentals = rentals
+			        .Where(r => r.Price <= filters.PriceLimit);
 			}
-
 			return rentals;
 		}
 
@@ -147,8 +139,11 @@ namespace RealEstate.Rentals
 
 		public string PriceDistribution()
 		{
+            //use aggregate framework
 			return new QueryPriceDistribution()
-				.Run(Context.Rentals)
+                //.RunAggregationFluent(ContextNew.Rentals) //new api v2
+                .RunLinq(ContextNew.Rentals) // run Linq
+				//.Run(Context.Rentals) // obsolete api
 				.ToJson();
 		}
 

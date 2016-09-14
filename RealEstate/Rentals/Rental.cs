@@ -6,6 +6,7 @@
 	using MongoDB.Bson;
 	using MongoDB.Bson.Serialization.Attributes;
 
+   
 	public class Rental
 	{
 		[BsonRepresentation(BsonType.ObjectId)]
