@@ -13,7 +13,6 @@ namespace RealEstate.Rentals
     using System.Web.Mvc;
     using App_Start;
     using MongoDB.Bson;
-    using MongoDB.Driver.Builders;
     using MongoDB.Driver.GridFS;
     using MongoDB.Driver.Linq;
 
@@ -21,7 +20,7 @@ namespace RealEstate.Rentals
     {
 
         public readonly RealEstateContextNewApis ContextNew = new RealEstateContextNewApis();
-        public readonly RealEstateContext Context = new RealEstateContext();
+        //public readonly RealEstateContext Context = new RealEstateContext();
 
         public async Task<ActionResult> Index(RentalsFilter filters)
         {
