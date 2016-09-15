@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using MongoDB.Driver.Core.Configuration;
+using MongoDB.Driver.GridFS;
 
 namespace RealEstate.App_Start
 {
@@ -43,7 +44,11 @@ namespace RealEstate.App_Start
             };
             var client = new MongoClient(settings);
             Database = client.GetDatabase(Settings.Default.RealEstateDatabaseName);
+
+            ImagesBucket = new GridFSBucket(Database);
         }
+
+        public GridFSBucket ImagesBucket { get; private set; }
 
         public IMongoCollection<Rental> Rentals => Database.GetCollection<Rental>("rentals");
     }

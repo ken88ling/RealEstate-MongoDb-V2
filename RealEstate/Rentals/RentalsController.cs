@@ -175,13 +175,13 @@ namespace RealEstate.Rentals
 
         private async Task StoreImageAsync(HttpPostedFileBase file, string rentalId)
         {
-            var bucket = new GridFSBucket(ContextNew.Database);
-
+            //var bucket = new GridFSBucket(ContextNew.Database);
             GridFSUploadOptions options = new GridFSUploadOptions
             {
                 Metadata = new BsonDocument("contentType",file.ContentType)
             };
-            var imageId = await bucket.UploadFromStreamAsync(file.FileName, file.InputStream,options);
+            var imageId = await ContextNew.ImagesBucket
+                .UploadFromStreamAsync(file.FileName, file.InputStream,options);
             SetRentalImageId(rentalId, imageId.ToString());
 
         }
@@ -195,13 +195,10 @@ namespace RealEstate.Rentals
 
         public ActionResult GetImage(string id)
         {
-            var image = Context.Database.GridFS
-                .FindOneById(new ObjectId(id));
-            if (image == null)
-            {
-                return HttpNotFound();
-            }
-            return File(image.OpenRead(), image.ContentType);
+            var stream = ContextNew.ImagesBucket.OpenDownloadStream(new ObjectId(id));
+            var contentType = stream.FileInfo.ContentType 
+                ?? stream.FileInfo.Metadata["contentType"].AsString;
+            return File(stream, contentType);
         }
 
         public ActionResult JoinPreLookup()
