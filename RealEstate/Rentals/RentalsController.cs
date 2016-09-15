@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Threading;
+using System.Threading.Tasks;
 using MongoDB.Bson.IO;
 using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
@@ -155,14 +156,14 @@ namespace RealEstate.Rentals
         }
 
         [HttpPost]
-        public ActionResult AttachImage(string id, HttpPostedFileBase file)
+        public async Task<ActionResult> AttachImage(string id, HttpPostedFileBase file)
         {
             var rental = GetRental(id);
             if (rental.HasImage())
             {
                 DeleteImage(rental);
             }
-            StoreImage(file, id);
+            await StoreImageAsync(file, id);
             return RedirectToAction("Index");
         }
 
@@ -172,16 +173,17 @@ namespace RealEstate.Rentals
             SetRentalImageId(rental.Id, null);
         }
 
-        private void StoreImage(HttpPostedFileBase file, string rentalId)
+        private async Task StoreImageAsync(HttpPostedFileBase file, string rentalId)
         {
-            var imageId = ObjectId.GenerateNewId();
-            SetRentalImageId(rentalId, imageId.ToString());
-            var options = new MongoGridFSCreateOptions
+            var bucket = new GridFSBucket(ContextNew.Database);
+
+            GridFSUploadOptions options = new GridFSUploadOptions
             {
-                Id = imageId,
-                ContentType = file.ContentType
+                Metadata = new BsonDocument("contentType",file.ContentType)
             };
-            Context.Database.GridFS.Upload(file.InputStream, file.FileName, options);
+            var imageId = await bucket.UploadFromStreamAsync(file.FileName, file.InputStream,options);
+            SetRentalImageId(rentalId, imageId.ToString());
+
         }
 
         private void SetRentalImageId(string rentalId, string imageId)
